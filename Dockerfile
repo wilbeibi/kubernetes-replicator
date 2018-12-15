@@ -1,12 +1,17 @@
-FROM golang:1.8
+FROM golang:1.11-alpine as build
 
-COPY . /go/src/github.com/mittwald/kubernetes-replicator
-WORKDIR /go/src/github.com/mittwald/kubernetes-replicator
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o replicator .
+RUN apk add --no-cache git build-base && \
+    echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories && \
+    echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
+    echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
+    apk add --no-cache upx
+
+ADD . /src
+ENV GO111MODULE=on
+RUN cd /src && CGO_ENABLED=0 GOOS=linux go build -o replicator .
 
 FROM scratch
-MAINTAINER Martin Helmich <m.helmich@mittwald.de>
+MAINTAINER Hongyi Shen <wilbeibi@gmail.com>
 
-COPY --from=0 /go/src/github.com/mittwald/kubernetes-replicator/replicator /replicator
-
+COPY --from=build /src/replicator /replicator
 CMD ["/replicator"]
