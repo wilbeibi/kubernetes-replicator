@@ -32,3 +32,7 @@ data: {}
 
 The replicator will then copy the `data` attribute of the referenced object into
 the annotated object and keep them in sync.   
+
+## TODO
+1. Create a chart for it
+2. use configmap instead of empty secret to record sync relationship
